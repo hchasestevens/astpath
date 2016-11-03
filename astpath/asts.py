@@ -1,10 +1,6 @@
 import ast
-from functools import partial
 
-try:
-    _basestring = basestring
-except NameError:
-    _basestring = str
+from lxml import etree
 
 
 def _strip_docstring(body):
@@ -14,35 +10,49 @@ def _strip_docstring(body):
     return body
 
 
-def recurse_through_ast(node, handle_ast, handle_terminal, handle_fields, handle_no_fields, omit_docstrings):
+def convert_to_xml(node, omit_docstrings=False, node_mappings=None):
     possible_docstring = isinstance(node, (ast.FunctionDef, ast.ClassDef, ast.Module))
+    
+    xml_node = etree.Element(node.__class__.__name__)
+    for attr in ('lineno', 'col_offset'):
+        value = getattr(node, attr, None)
+        if value is not None:
+            xml_node.set(attr, str(value))
+    if node_mappings is not None:
+        node_mappings[xml_node] = node
     
     node_fields = zip(
         node._fields,
         (getattr(node, attr) for attr in node._fields)
     )
-    field_results = []
+    
     for field_name, field_value in node_fields:
         if isinstance(field_value, ast.AST):
-            field_results.append(handle_ast(field_value))
-        
-        elif isinstance(field_value, list):
-            if possible_docstring and omit_docstrings and field_name == 'body':
-                field_value = _strip_docstring(field_value)
-            field_results.extend(
-                handle_ast(item)
-                if isinstance(item, ast.AST) else
-                handle_terminal(item)
-                for item in field_value
+            field = etree.SubElement(xml_node, field_name)
+            field.append(
+                convert_to_xml(
+                    field_value, 
+                    omit_docstrings,
+                    node_mappings,
+                )
             )
         
-        elif isinstance(field_value, _basestring):
-            field_results.append(handle_terminal('"{}"'.format(field_value)))
+        elif isinstance(field_value, list):
+            field = etree.SubElement(xml_node, field_name)
+            if possible_docstring and omit_docstrings and field_name == 'body':
+                field_value = _strip_docstring(field_value)
             
+            for item in field_value:
+                assert isinstance(item, ast.AST)
+                field.append(
+                    convert_to_xml(
+                        item,
+                        omit_docstrings,
+                        node_mappings,
+                    )
+                )
+
         elif field_value is not None:
-            field_results.append(handle_terminal(field_value))
-
-    if not field_results:
-        return handle_no_fields(node)
-
-    return handle_fields(node, field_results)
+            xml_node.set(field_name, str(field_value))
+            
+    return xml_node
