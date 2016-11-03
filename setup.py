@@ -4,7 +4,7 @@ setup(
     name = 'astpath',
     packages = ['astpath'],
     version = '0.1.0',
-    description = 'A query language from Python abstract syntax trees',
+    description = 'A query language for Python abstract syntax trees',
     license='MIT',
     author='H. Chase Stevens',
     author_email='chase@chasestevens.com',
