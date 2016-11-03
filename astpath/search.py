@@ -28,17 +28,25 @@ def find_in_ast(xml_ast, expr, return_lines=True):
     return results
 
 
+def file_contents_to_xml_ast(contents, omit_docstrings=False, node_mappings=None):
+    """
+    Convert Python file contents (as a string) to an XML AST,
+    for use with find_in_ast.
+    """
+    parsed_ast = ast.parse(contents)
+    return convert_to_xml(parsed_ast, omit_docstrings, node_mappings)
+
+
 def file_to_xml_ast(filename, omit_docstrings=False, node_mappings=None):
     """
     Convert a file to an XML AST, for use with find_in_ast.
     """
     with open(filename, 'r') as f:
         contents = f.read()
-    parsed_ast = ast.parse(contents)
-    return convert_to_xml(parsed_ast, omit_docstrings, node_mappings)
+    return file_contents_to_xml_ast(contents, omit_docstrings, node_mappings)
 
 
-def search(directory, expression, print_matches=True, return_lines=True, verbose=False):
+def search(directory, expression, print_matches=True, return_lines=True, show_lines=True, verbose=False):
     """
     Perform a recursive search through Python files in the given
     directory for items matching the specified expression.
@@ -53,10 +61,14 @@ def search(directory, expression, print_matches=True, return_lines=True, verbose
         )
         for filename in python_filenames:
             try:
-                xml_ast = file_to_xml_ast(filename)
+                with open(filename, 'r') as f:
+                    contents = f.read()
+                if show_lines:
+                    file_lines = contents.splitlines()
+                xml_ast = file_contents_to_xml_ast(contents)
             except Exception:
                 if verbose:
-                    print "WARNING: Unable to parse {}".format(filename)
+                    print "WARNING: Unable to parse or read {}".format(filename)
                 continue  # unparseable
                 
             file_matches = find_in_ast(
@@ -67,9 +79,11 @@ def search(directory, expression, print_matches=True, return_lines=True, verbose
                 
             for match in file_matches:
                 if print_matches:
-                    print '{}:{}'.format(
+                    print '{}:{}{}{}'.format(
                         filename,
                         match,  # will be a line number
+                        '::\t' if show_lines else '',
+                        file_lines[match - 1] if show_lines else '',
                     )
                 else:
                     global_matches.append((filename, match))
