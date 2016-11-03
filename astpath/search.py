@@ -17,10 +17,14 @@ def find_in_ast(xml_ast, expr, return_lines=True):
     if return_lines:
         lines = []
         for result in results:
-            linenos = result.xpath('./ancestor-or-self::*[@lineno][1]/@lineno')
+            try:
+                linenos = result.xpath('./ancestor-or-self::*[@lineno][1]/@lineno')
+            except AttributeError:
+                lines.append(result)  # result was a literal
+                continue
             if linenos:
-                lines.append(linenos[0])
-        return map(int, lines)
+                lines.append(int(linenos[0]))
+        return lines
     return results
 
 
