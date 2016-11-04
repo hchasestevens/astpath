@@ -3,7 +3,7 @@ from setuptools import setup
 setup(
     name = 'astpath',
     packages = ['astpath'],
-    version = '0.1.1',
+    version = '0.2.0',
     description = 'A query language for Python abstract syntax trees',
     license='MIT',
     author='H. Chase Stevens',
@@ -12,6 +12,11 @@ setup(
     install_requires=[
         'lxml',
     ],
+    entry_points={
+        'console_scripts': [
+            'astpath = astpath.cli:main',
+        ]
+    },
     keywords='xpath xml ast asts syntax query',
     classifiers=[
         'Development Status :: 3 - Alpha',

@@ -46,7 +46,7 @@ def file_to_xml_ast(filename, omit_docstrings=False, node_mappings=None):
     return file_contents_to_xml_ast(contents, omit_docstrings, node_mappings)
 
 
-def search(directory, expression, print_matches=True, return_lines=True, show_lines=True, verbose=False):
+def search(directory, expression, print_matches=True, return_lines=True, show_lines=True, verbose=False, abspaths=False):
     """
     Perform a recursive search through Python files in the given
     directory for items matching the specified expression.
@@ -80,7 +80,7 @@ def search(directory, expression, print_matches=True, return_lines=True, show_li
             for match in file_matches:
                 if print_matches:
                     print '{}:{}{}{}'.format(
-                        filename,
+                        os.path.abspath(filename) if abspaths else filename,
                         match,  # will be a line number
                         '::\t' if show_lines else '',
                         file_lines[match - 1] if show_lines else '',
