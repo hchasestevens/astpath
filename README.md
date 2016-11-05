@@ -60,7 +60,7 @@ $ astpath ".//Num[not(ancestor::Assign) and number(@n) > 1000]" | head -5
 `astpath` can also be imported and used programmatically:
 ```python
 >>> from astpath import search
->>> len(search('.', '//Print', print_matches=False))
+>>> len(search('.', '//Print', print_matches=False))  # number of print statements in the codebase
 751
 ```
 
