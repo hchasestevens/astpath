@@ -3,14 +3,14 @@ from setuptools import setup
 setup(
     name = 'astpath',
     packages = ['astpath'],
-    version = '0.3.0',
+    version = '0.3.1',
     description = 'A query language for Python abstract syntax trees',
     license='MIT',
     author='H. Chase Stevens',
     author_email='chase@chasestevens.com',
     url='https://github.com/hchasestevens/astpath',
     extras_require={
-        'XPath': ['lxml>=3.3.5']
+        'xpath': ['lxml>=3.3.5',]
     },
     entry_points={
         'console_scripts': [
