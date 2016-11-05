@@ -1,6 +1,9 @@
 import ast
 
-from lxml import etree
+try:
+    from lxml import etree
+except ImportError:
+    import xml.etree.ElementTree as etree
 
 
 def _strip_docstring(body):
@@ -11,6 +14,7 @@ def _strip_docstring(body):
 
 
 def convert_to_xml(node, omit_docstrings=False, node_mappings=None):
+    """Convert supplied AST node to XML."""
     possible_docstring = isinstance(node, (ast.FunctionDef, ast.ClassDef, ast.Module))
     
     xml_node = etree.Element(node.__class__.__name__)

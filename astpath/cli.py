@@ -9,7 +9,7 @@ parser.add_argument('--hide-lines', help="hide source lines, showing only line n
 parser.add_argument('--verbose', help="increase output verbosity", action='store_true',)
 parser.add_argument('--abspaths', help="show absolute paths", action='store_true',)
 parser.add_argument('--dir', help="search directory", default='.',)
-parser.add_argument('expr', help="search expression",)
+parser.add_argument('expr', help="search expression", nargs='+',)
 
 
 def main():
@@ -17,7 +17,7 @@ def main():
     args = parser.parse_args()
     search(
         args.dir, 
-        args.expr, 
+        ' '.join(args.expr), 
         show_lines=not args.hide_lines,
         verbose=args.verbose,
         abspaths=args.abspaths,

@@ -3,15 +3,15 @@ from setuptools import setup
 setup(
     name = 'astpath',
     packages = ['astpath'],
-    version = '0.2.0',
+    version = '0.3.0',
     description = 'A query language for Python abstract syntax trees',
     license='MIT',
     author='H. Chase Stevens',
     author_email='chase@chasestevens.com',
     url='https://github.com/hchasestevens/astpath',
-    install_requires=[
-        'lxml',
-    ],
+    extras_require={
+        'XPath': ['lxml>=3.3.5']
+    }
     entry_points={
         'console_scripts': [
             'astpath = astpath.cli:main',
