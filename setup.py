@@ -11,7 +11,7 @@ setup(
     url='https://github.com/hchasestevens/astpath',
     extras_require={
         'XPath': ['lxml>=3.3.5']
-    }
+    },
     entry_points={
         'console_scripts': [
             'astpath = astpath.cli:main',
@@ -27,5 +27,5 @@ setup(
         'Operating System :: OS Independent',
         'License :: OSI Approved :: MIT License',
         'Natural Language :: English',
-    ]
+    ],
 )
