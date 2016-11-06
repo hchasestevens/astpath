@@ -5,20 +5,6 @@
 
 ⅠⅠ. A better way of searching your codebase.
 
-## Installation
-It is recommended that `astpath` be installed with the optional `lxml` dependency, to allow full use of the XPath query language. 
-To do so,
-```
-pip install astpath[xpath]
-```
-
-Alternatively, a no-dependency version using Python's builtin XPath subset can be installed via
-```
-pip install astpath
-```
-
-`astpath` supports both Python 2.x and 3.x.
-
 ## Example usage
 
 Finding all usages of the "eval" builtin:
@@ -67,6 +53,20 @@ $ astpath ".//Num[not(ancestor::Assign) and number(@n) > 1000]" | head -5
 >>> len(search('.', '//Print', print_matches=False))  # number of print statements in the codebase
 751
 ```
+
+## Installation
+It is recommended that `astpath` be installed with the optional `lxml` dependency, to allow full use of the XPath query language. 
+To do so,
+```
+pip install astpath[xpath]
+```
+
+Alternatively, a no-dependency version using Python's builtin XPath subset can be installed via
+```
+pip install astpath
+```
+
+`astpath` supports both Python 2.x and 3.x.
 
 ## Links
 * [Green tree snakes](https://greentreesnakes.readthedocs.io/en/latest/) - a very readable overview of Python ASTs.
