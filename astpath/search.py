@@ -89,7 +89,7 @@ def file_to_xml_ast(filename, omit_docstrings=False, node_mappings=None):
     )
 
 
-def search(directory, expression, print_matches=True, return_lines=True, show_lines=True, verbose=False, abspaths=False):
+def search(directory, expression, print_matches=True, return_lines=True, show_lines=True, verbose=False, abspaths=False, recurse=True):
     """
     Perform a recursive search through Python files in the given
     directory for items matching the specified expression.
@@ -99,8 +99,29 @@ def search(directory, expression, print_matches=True, return_lines=True, show_li
         
     query = _query_factory(verbose=verbose)
     
+    if os.path.isfile(directory):
+        if recurse:
+            raise ValueError(
+                "Cannot recurse when only a single file is specified."
+            )
+        files = (('', None, [directory]),)
+    elif recurse:
+        files = os.walk(directory)
+    else:
+        files = ((directory, None, [
+            item 
+            for item in 
+            os.listdir(directory)
+            if os.path.isfile(
+                os.path.join(
+                    directory,
+                    item,
+                )
+            )
+        ]),)
+    
     global_matches = []
-    for root, __, filenames in os.walk(directory):
+    for root, __, filenames in files:
         python_filenames = (
             os.path.join(root, filename)
             for filename in 
