@@ -1,5 +1,9 @@
 # astpath
-A command-line utility for querying Python ASTs using XPath syntax.
+[e ɛs ti pæθ] _n_.
+
+Ⅰ. A command-line utility for querying Python ASTs using XPath syntax.
+
+ⅠⅠ. A better way of searching your codebase.
 
 ## Installation
 It is recommended that `astpath` be installed with the optional `lxml` dependency, to allow full use of the XPath query language. 
