@@ -3,7 +3,7 @@
 
 Ⅰ. A command-line utility for querying Python ASTs using XPath syntax.
 
-ⅠⅠ. A better way of searching your codebase.
+ⅠⅠ. A better way of searching through your codebase.
 
 ## Example usage
 
