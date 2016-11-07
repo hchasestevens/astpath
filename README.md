@@ -40,11 +40,11 @@ $ astpath ".//Num[not(ancestor::Assign)]" | head -5
 ... and are greater than 1000:
 ```bash
 $ astpath ".//Num[not(ancestor::Assign) and number(@n) > 1000]" | head -5
-./python2.7/decimal.py:959      >                    return 314159
-./python2.7/fractions.py:206    >    def limit_denominator(self, max_denominator=1000000):
-./python2.7/pty.py:138  >    return os.read(fd, 1024)
-./python2.7/whichdb.py:94       >    if magic in (0x13579ace, 0x13579acd, 0x13579acf):
-./python2.7/whichdb.py:94       >    if magic in (0x13579ace, 0x13579acd, 0x13579acf):
+./decimal.py:959      >                    return 314159
+./fractions.py:206    >    def limit_denominator(self, max_denominator=1000000):
+./pty.py:138  >    return os.read(fd, 1024)
+./whichdb.py:94       >    if magic in (0x13579ace, 0x13579acd, 0x13579acf):
+./whichdb.py:94       >    if magic in (0x13579ace, 0x13579acd, 0x13579acf):
 ```
 
 `astpath` can also be imported and used programmatically:
