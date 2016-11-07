@@ -65,6 +65,14 @@ $ astpath "//ExceptHandler[body//Raise/exc//Name and not(contains(body//Raise/ex
 ./argparse.py:1116      >        except KeyError:
 ```
 
+_Finding beginnings of unreachable code blocks:_
+```bash
+$ astpath "//body/*[preceding-sibling::Return or preceding-sibling::Raise][1]"
+./unittest/test/testmock/testhelpers.py:381     >        class Foo(object):
+./test/test_deque.py:16 >    yield 1
+./test/test_posix.py:728        >            def _create_and_do_getcwd(dirname, current_path_length = 0):
+```
+
 `astpath` can also be imported and used programmatically:
 ```python
 >>> from astpath import search
