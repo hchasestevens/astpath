@@ -7,7 +7,7 @@
 
 ## Example usage
 
-Finding all usages of the "eval" builtin:
+#### Finding all usages of the "eval" builtin:
 ```bash
 $ astpath ".//Call/func/Name[@id='eval']" | head -5
 ./rlcompleter.py:136    >            thisobject = eval(expr, self.namespace)
@@ -17,7 +17,7 @@ $ astpath ".//Call/func/Name[@id='eval']" | head -5
 ./pdb.py:760    >            return eval(arg, self.curframe.f_globals,
 ```
 
-Finding all numbers:
+#### Finding all numbers:
 ```bash
 $ astpath .//Num | head -5
 ./DocXMLRPCServer.py:31 >        here = 0
@@ -47,7 +47,26 @@ $ astpath ".//Num[not(ancestor::Assign) and number(@n) > 1000]" | head -5
 ./whichdb.py:94       >    if magic in (0x13579ace, 0x13579acd, 0x13579acf):
 ```
 
-`astpath` can also be imported and used programmatically:
+#### Finding names longer than 42 characters:
+```bash
+$ astpath "//Name[string-length(@id) > 42]"
+./site-packages/setuptools/dist.py:59   >_patch_distribution_metadata_write_pkg_info()
+./site-packages/setuptools/command/easy_install.py:1759 >        updater=clear_and_remove_cached_zip_archive_directory_data)
+./test/test_reprlib.py:268      >        module = areallylongpackageandmodulenametotestreprtruncation
+./test/test_argparse.py:2744    >    MEPBase, TestMutuallyExclusiveOptionalsAndPositionalsMixed):
+```
+
+#### Finding `except` clauses that raise a different exception class than they catch:
+```bash
+$ astpath "//ExceptHandler[body//Raise/exc//Name and not(contains(string(body//Raise/exc//Name/@id), type/Name/@id))]" | head -5
+./hashlib.py:144        >except ImportError:
+./plistlib.py:89        >        except KeyError:
+./plistlib.py:103       >        except KeyError:
+./nntplib.py:868        >        except ValueError:
+./argparse.py:1116      >        except KeyError:
+```
+
+#### `astpath` can also be imported and used programmatically:
 ```python
 >>> from astpath import search
 >>> len(search('.', '//Print', print_matches=False))  # number of print statements in the codebase
