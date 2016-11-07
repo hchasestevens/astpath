@@ -7,7 +7,7 @@
 
 ## Example usage
 
-#### Finding all usages of the "eval" builtin:
+#### Finding all usages of the `eval` builtin:
 ```bash
 $ astpath ".//Call/func/Name[@id='eval']" | head -5
 ./rlcompleter.py:136    >            thisobject = eval(expr, self.namespace)
@@ -58,7 +58,7 @@ $ astpath "//Name[string-length(@id) > 42]"
 
 #### Finding `except` clauses that raise a different exception class than they catch:
 ```bash
-$ astpath "//ExceptHandler[body//Raise/exc//Name and not(contains(string(body//Raise/exc//Name/@id), type/Name/@id))]" | head -5
+$ astpath "//ExceptHandler[body//Raise/exc//Name and not(contains(body//Raise/exc//Name/@id, type/Name/@id))]" | head -5
 ./hashlib.py:144        >except ImportError:
 ./plistlib.py:89        >        except KeyError:
 ./plistlib.py:103       >        except KeyError:
