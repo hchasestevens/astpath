@@ -1,10 +1,10 @@
 from setuptools import setup
  
 setup(
-    name = 'astpath',
-    packages = ['astpath'],
-    version = '0.4.0',
-    description = 'A query language for Python abstract syntax trees',
+    name='astpath',
+    packages=['astpath'],
+    version='0.5.0',
+    description='A query language for Python abstract syntax trees',
     license='MIT',
     author='H. Chase Stevens',
     author_email='chase@chasestevens.com',
@@ -27,5 +27,5 @@ setup(
         'Operating System :: OS Independent',
         'License :: OSI Approved :: MIT License',
         'Natural Language :: English',
-    ],
+    ]
 )

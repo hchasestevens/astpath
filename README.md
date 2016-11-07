@@ -66,6 +66,8 @@ Alternatively, a no-dependency version using Python's builtin XPath subset can b
 pip install astpath
 ```
 
+`astpath` supports both Python 2.x and 3.x.
+
 ## Links
 * [Green tree snakes](https://greentreesnakes.readthedocs.io/en/latest/) - a very readable overview of Python ASTs.
 * Official `ast` module documentation for [Python 2.7](https://docs.python.org/2.7/library/ast.html) and [Python 3.X](https://docs.python.org/3/library/ast.html).

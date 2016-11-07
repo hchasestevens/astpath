@@ -141,9 +141,9 @@ def search(directory, expression, print_matches=True, return_lines=True, show_li
                 )
             except Exception:
                 if verbose:
-                    print "WARNING: Unable to parse or read {}".format(
+                    print("WARNING: Unable to parse or read {}".format(
                         os.path.abspath(filename) if abspaths else filename
-                    )
+                    ))
                 continue  # unparseable
                 
             file_matches = find_in_ast(
@@ -156,12 +156,12 @@ def search(directory, expression, print_matches=True, return_lines=True, show_li
                 
             for match in file_matches:
                 if print_matches:
-                    print '{}:{}{}{}'.format(
+                    print('{}:{}{}{}'.format(
                         os.path.abspath(filename) if abspaths else filename,
                         match,  # will be a line number
                         '\t>' if show_lines else '',
                         file_lines[match - 1] if show_lines else '',
-                    )
+                    ))
                 else:
                     global_matches.append((filename, match))
                     

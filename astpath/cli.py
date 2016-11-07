@@ -21,7 +21,7 @@ def main():
     if os.path.isfile(args.dir):
         recurse = False
         if not args.no_recurse and args.verbose:
-            print "WARNINING: Not recursing, as a single file was passed."
+            print("WARNING: Not recursing, as a single file was passed.")
     else:
         recurse = not args.no_recurse
         
