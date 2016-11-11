@@ -1,9 +1,21 @@
 import ast
+import codecs
+from numbers import Number
+from functools import partial
 
 try:
     from lxml import etree
 except ImportError:
     import xml.etree.ElementTree as etree
+    
+    
+def _set_encoded_literal(set_fn, literal):
+    if isinstance(literal, Number):
+        literal = str(literal)
+    try:
+        set_fn(codecs.encode(literal, 'ascii', 'xmlcharrefreplace'))
+    except Exception:
+        set_fn('')  # Null byte - failover to empty string
 
 
 def _strip_docstring(body):
@@ -21,7 +33,10 @@ def convert_to_xml(node, omit_docstrings=False, node_mappings=None):
     for attr in ('lineno', 'col_offset'):
         value = getattr(node, attr, None)
         if value is not None:
-            xml_node.set(attr, str(value))
+            _set_encoded_literal(
+                partial(xml_node.set, attr), 
+                value
+            )
     if node_mappings is not None:
         node_mappings[xml_node] = node
     
@@ -47,16 +62,25 @@ def convert_to_xml(node, omit_docstrings=False, node_mappings=None):
                 field_value = _strip_docstring(field_value)
             
             for item in field_value:
-                assert isinstance(item, ast.AST)
-                field.append(
-                    convert_to_xml(
-                        item,
-                        omit_docstrings,
-                        node_mappings,
+                if isinstance(item, ast.AST):
+                    field.append(
+                        convert_to_xml(
+                            item,
+                            omit_docstrings,
+                            node_mappings,
+                        )
                     )
-                )
+                else:
+                    subfield = etree.SubElement(field, 'item')
+                    _set_encoded_literal(
+                        partial(setattr, subfield, 'text'),
+                        item
+                    )
 
         elif field_value is not None:
-            xml_node.set(field_name, str(field_value))
+            _set_encoded_literal(
+                partial(xml_node.set, field_name),
+                field_value
+            )
             
     return xml_node
