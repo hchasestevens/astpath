@@ -73,7 +73,7 @@ $ astpath "//body/*[preceding-sibling::Return or preceding-sibling::Raise][1]"
 ./test/test_posix.py:728        >            def _create_and_do_getcwd(dirname, current_path_length = 0):
 ```
 
-_Finding candidates for replacement with_ `sum`:
+_Finding candidates for replacement with_ `sum`_:_
 ```bash
 $ astpath -A 1 "//For/body[AugAssign/op/Add and count(child::*)=1]" | head -6
 ./functools.py:374      >        for item in sorted_items:
