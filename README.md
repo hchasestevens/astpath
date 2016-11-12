@@ -73,6 +73,17 @@ $ astpath "//body/*[preceding-sibling::Return or preceding-sibling::Raise][1]"
 ./test/test_posix.py:728        >            def _create_and_do_getcwd(dirname, current_path_length = 0):
 ```
 
+_Finding candidates for replacement with_ `sum`:
+```bash
+$ astpath -A 1 "//For/body[AugAssign/op/Add and count(child::*)=1]" | head -6
+./functools.py:374      >        for item in sorted_items:
+./functools.py:375                   key += item
+./statistics.py:177     >    for d, n in sorted(partials.items()):
+./statistics.py:178              total += Fraction(n, d)
+./pstats.py:512 >    for calls in callers.values():
+./pstats.py:513          nc += calls
+```
+
 `astpath` can also be imported and used programmatically:
 ```python
 >>> from astpath import search
