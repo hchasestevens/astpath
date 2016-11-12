@@ -89,7 +89,7 @@ def file_to_xml_ast(filename, omit_docstrings=False, node_mappings=None):
     )
 
 
-def search(directory, expression, print_matches=True, return_lines=True, show_lines=True, verbose=False, abspaths=False, recurse=True):
+def search(directory, expression, print_matches=True, return_lines=True, show_lines=True, verbose=False, abspaths=False, recurse=True, before_context=0, after_context=0):
     """
     Perform a recursive search through Python files in the given
     directory for items matching the specified expression.
@@ -156,12 +156,39 @@ def search(directory, expression, print_matches=True, return_lines=True, show_li
                 
             for match in file_matches:
                 if print_matches:
+                    matching_line = match - 1
+                    
+                    if show_lines:
+                        before_lines = range(
+                            max(matching_line - before_context, 0), 
+                            matching_line
+                        )
+                        after_lines = range(
+                            matching_line + 1, 
+                            min(matching_line + after_context + 1, len(file_lines))
+                        )
+                        len_match = len(str(match))
+                        for i in before_lines:
+                            print('{}:{}\t {}'.format(
+                                os.path.abspath(filename) if abspaths else filename,
+                                str(i + 1).rjust(len_match),
+                                file_lines[i],
+                            ))
+                    
                     print('{}:{}{}{}'.format(
                         os.path.abspath(filename) if abspaths else filename,
                         match,  # will be a line number
                         '\t>' if show_lines else '',
-                        file_lines[match - 1] if show_lines else '',
+                        file_lines[matching_line] if show_lines else '',
                     ))
+                    
+                    if show_lines:
+                        for i in after_lines:
+                            print('{}:{}\t {}'.format(
+                                os.path.abspath(filename) if abspaths else filename,
+                                str(i + 1).rjust(len_match),
+                                file_lines[i],
+                            ))
                 else:
                     global_matches.append((filename, match))
                     

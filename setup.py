@@ -3,7 +3,7 @@ from setuptools import setup
 setup(
     name='astpath',
     packages=['astpath'],
-    version='0.5.2',
+    version='0.6.0',
     description='A query language for Python abstract syntax trees',
     license='MIT',
     author='H. Chase Stevens',
