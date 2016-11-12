@@ -6,7 +6,7 @@ from astpath.search import search
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-h', '--hide-lines', help="hide source lines, showing only line numbers", action='store_true',)
+parser.add_argument('-s', '--hide-lines', help="hide source lines, showing only line numbers", action='store_true',)
 parser.add_argument('-v', '--verbose', help="increase output verbosity", action='store_true',)
 parser.add_argument('-a', '--abspaths', help="show absolute paths", action='store_true',)
 parser.add_argument('-R', '--no-recurse', help="ignore subdirectories, searching only files in the specified directory", action='store_true',)
