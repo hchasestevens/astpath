@@ -1,4 +1,14 @@
 #!/usr/bin/python
+
+"""
+The Command Line Interface using argparse.
+
+For more help use::
+
+    astpath -h
+
+"""
+
 import os
 import argparse
 
@@ -20,23 +30,23 @@ parser.add_argument('expr', help="search expression", nargs='+',)
 def main():
     """Entrypoint for CLI."""
     args = parser.parse_args()
-    
+
     if os.path.isfile(args.dir):
         recurse = False
         if not args.no_recurse and args.verbose:
             print("WARNING: Not recursing, as a single file was passed.")
     else:
         recurse = not args.no_recurse
-        
+
     before_context = args.before_context or args.context
     after_context = args.after_context or args.context
     if (before_context or after_context) and args.hide_lines:
         print("ERROR: Context cannot be specified when suppressing output.")
         exit(1)
-        
+
     search(
-        args.dir, 
-        ' '.join(args.expr), 
+        args.dir,
+        ' '.join(args.expr),
         show_lines=not args.hide_lines,
         verbose=args.verbose,
         abspaths=args.abspaths,
@@ -44,7 +54,7 @@ def main():
         before_context=before_context,
         after_context=after_context
     )
-    
-    
+
+
 if __name__ == "__main__":
     main()

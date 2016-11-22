@@ -1,5 +1,7 @@
+"""Setup for astpath, adds astpath console_script."""
+
 from setuptools import setup
- 
+
 setup(
     name='astpath',
     packages=['astpath'],
@@ -10,7 +12,7 @@ setup(
     author_email='chase@chasestevens.com',
     url='https://github.com/hchasestevens/astpath',
     extras_require={
-        'xpath': ['lxml>=3.3.5',]
+        'xpath': ['lxml>=3.3.5', ]
     },
     entry_points={
         'console_scripts': [
