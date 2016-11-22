@@ -1,3 +1,6 @@
+"""Functions for searching the XML from file, file contents, or directory."""
+
+
 import os
 import ast
 
@@ -10,15 +13,15 @@ PYTHON_EXTENSION = '{}py'.format(os.path.extsep)
 def _query_factory(verbose=False):
     def lxml_query(element, expression):
         return element.xpath(expression)
-    
+
     def xml_query(element, expression):
         return element.findall(expression)
-    
+
     try:
         import lxml
     except ImportError:
         if verbose:
-            print (
+            print(
                 "WARNING: lxml could not be imported, "
                 "falling back to native XPath engine."
             )
@@ -29,15 +32,16 @@ def _query_factory(verbose=False):
 
 def find_in_ast(xml_ast, expr, return_lines=True, query=_query_factory(), node_mappings=None):
     """
-    Find items matching expression expr in an XML AST. If 
-    return_lines is True, return only matching line numbers, 
-    otherwise returning XML nodes.
+    Find items matching expression expr in an XML AST.
+
+    If return_lines is True, return only matching line numbers, otherwise
+    returning XML nodes.
     """
     results = query(xml_ast, expr)
-    
+
     if not return_lines:
         return results
-    
+
     lines = []
     for result in results:
         try:
@@ -57,48 +61,45 @@ def find_in_ast(xml_ast, expr, return_lines=True, query=_query_factory(), node_m
                     "backend without `node_mappings` supplied."
                 )
             linenos = getattr(node_mappings[result], 'lineno', 0),
-            
+
         if linenos:
             lines.append(int(linenos[0]))
     return lines
 
 
 def file_contents_to_xml_ast(contents, omit_docstrings=False, node_mappings=None):
-    """
-    Convert Python file contents (as a string) to an XML AST,
-    for use with find_in_ast.
-    """
+    """Convert Python file contents (as a string) to an XML AST, for use with find_in_ast."""
     parsed_ast = ast.parse(contents)
     return convert_to_xml(
-        parsed_ast, 
-        omit_docstrings=omit_docstrings, 
+        parsed_ast,
+        omit_docstrings=omit_docstrings,
         node_mappings=node_mappings,
     )
 
 
 def file_to_xml_ast(filename, omit_docstrings=False, node_mappings=None):
-    """
-    Convert a file to an XML AST, for use with find_in_ast.
-    """
+    """Convert a file to an XML AST, for use with find_in_ast."""
     with open(filename, 'r') as f:
         contents = f.read()
     return file_contents_to_xml_ast(
-        contents, 
-        omit_docstrings=omit_docstrings, 
+        contents,
+        omit_docstrings=omit_docstrings,
         node_mappings=node_mappings,
     )
 
 
 def search(directory, expression, print_matches=True, return_lines=True, show_lines=True, verbose=False, abspaths=False, recurse=True, before_context=0, after_context=0):
     """
-    Perform a recursive search through Python files in the given
-    directory for items matching the specified expression.
+    Perform a recursive search through Python files.
+
+    Only for files in the given directory for items matching the specified
+    expression.
     """
     if show_lines and not return_lines:
         raise ValueError("`return_lines` must be set if showing lines.")
-        
+
     query = _query_factory(verbose=verbose)
-    
+
     if os.path.isfile(directory):
         if recurse:
             raise ValueError(
@@ -109,8 +110,8 @@ def search(directory, expression, print_matches=True, return_lines=True, show_li
         files = os.walk(directory)
     else:
         files = ((directory, None, [
-            item 
-            for item in 
+            item
+            for item in
             os.listdir(directory)
             if os.path.isfile(
                 os.path.join(
@@ -119,12 +120,12 @@ def search(directory, expression, print_matches=True, return_lines=True, show_li
                 )
             )
         ]),)
-    
+
     global_matches = []
     for root, __, filenames in files:
         python_filenames = (
             os.path.join(root, filename)
-            for filename in 
+            for filename in
             filenames
             if filename.endswith(PYTHON_EXTENSION)
         )
@@ -136,7 +137,7 @@ def search(directory, expression, print_matches=True, return_lines=True, show_li
                 if show_lines:
                     file_lines = contents.splitlines()
                 xml_ast = file_contents_to_xml_ast(
-                    contents, 
+                    contents,
                     node_mappings=node_mappings,
                 )
             except Exception:
@@ -145,26 +146,26 @@ def search(directory, expression, print_matches=True, return_lines=True, show_li
                         os.path.abspath(filename) if abspaths else filename
                     ))
                 continue  # unparseable
-                
+
             file_matches = find_in_ast(
-                xml_ast, 
-                expression, 
+                xml_ast,
+                expression,
                 return_lines=print_matches or return_lines,
                 query=query,
                 node_mappings=node_mappings,
             )
-                
+
             for match in file_matches:
                 if print_matches:
                     matching_line = match - 1
-                    
+
                     if show_lines:
                         before_lines = range(
-                            max(matching_line - before_context, 0), 
+                            max(matching_line - before_context, 0),
                             matching_line
                         )
                         after_lines = range(
-                            matching_line + 1, 
+                            matching_line + 1,
                             min(matching_line + after_context + 1, len(file_lines))
                         )
                         len_match = len(str(match))
@@ -174,14 +175,14 @@ def search(directory, expression, print_matches=True, return_lines=True, show_li
                                 str(i + 1).rjust(len_match),
                                 file_lines[i],
                             ))
-                    
+
                     print('{}:{}{}{}'.format(
                         os.path.abspath(filename) if abspaths else filename,
                         match,  # will be a line number
                         '\t>' if show_lines else '',
                         file_lines[matching_line] if show_lines else '',
                     ))
-                    
+
                     if show_lines:
                         for i in after_lines:
                             print('{}:{}\t {}'.format(
@@ -191,6 +192,6 @@ def search(directory, expression, print_matches=True, return_lines=True, show_li
                             ))
                 else:
                     global_matches.append((filename, match))
-                    
+
     if not print_matches:
         return global_matches
