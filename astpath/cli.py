@@ -17,6 +17,7 @@ from astpath.search import search
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-s', '--hide-lines', help="hide source lines, showing only line numbers", action='store_true',)
+parser.add_argument('-q', '--quiet', help="hide output of matches", action='store_true',)
 parser.add_argument('-v', '--verbose', help="increase output verbosity", action='store_true',)
 parser.add_argument('-a', '--abspaths', help="show absolute paths", action='store_true',)
 parser.add_argument('-R', '--no-recurse', help="ignore subdirectories, searching only files in the specified directory", action='store_true',)
@@ -38,8 +39,8 @@ def main():
     else:
         recurse = not args.no_recurse
 
-    before_context = args.before_context or args.context
-    after_context = args.after_context or args.context
+    before_context = args.context or args.before_context
+    after_context = args.context or args.after_context
     if (before_context or after_context) and args.hide_lines:
         print("ERROR: Context cannot be specified when suppressing output.")
         exit(1)
@@ -48,11 +49,12 @@ def main():
         args.dir,
         ' '.join(args.expr),
         show_lines=not args.hide_lines,
+        print_matches=not args.quiet,
         verbose=args.verbose,
         abspaths=args.abspaths,
         recurse=recurse,
         before_context=before_context,
-        after_context=after_context
+        after_context=after_context,
     )
 
 
