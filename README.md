@@ -18,7 +18,7 @@ $ astpath ".//Call/func/Name[@id='eval']" | head -5
 
 _Finding all numbers:_
 ```bash
-$ astpath .//Num | head -5
+$ astpath ".//Num" | head -5
 ./DocXMLRPCServer.py:31 >        here = 0
 ./DocXMLRPCServer.py:41 >        while 1:
 ./DocXMLRPCServer.py:57 >            elif text[end:end+1] == '(':
@@ -103,7 +103,7 @@ Alternatively, a no-dependency version using Python's builtin XPath subset can b
 pip install astpath
 ```
 
-`astpath` supports both Python 2.x and 3.x.
+`astpath` supports both Python 2.7 and 3.x.
 
 ## Links
 * [Green tree snakes](https://greentreesnakes.readthedocs.io/en/latest/) - a very readable overview of Python ASTs.
