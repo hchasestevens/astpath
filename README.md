@@ -1,4 +1,7 @@
 # astpath
+![PyPI](https://img.shields.io/pypi/v/astpath.svg)
+![Liberapay receiving](https://img.shields.io/liberapay/receives/hchasestevens.svg)
+
 [e ɛs ti pæθ] _n_.
 
 Ⅰ. A command-line utility for querying Python ASTs using XPath syntax.
