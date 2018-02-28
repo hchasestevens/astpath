@@ -1,5 +1,5 @@
 # astpath
-![PyPI](https://img.shields.io/pypi/v/astpath.svg)
+[![PyPI version](https://badge.fury.io/py/astpath.svg)](https://badge.fury.io/py/astpath)
 ![Liberapay receiving](https://img.shields.io/liberapay/receives/hchasestevens.svg)
 
 [e ɛs ti pæθ] _n_.
