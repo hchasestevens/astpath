@@ -1,10 +1,19 @@
 """Functions for searching the XML from file, file contents, or directory."""
 
 
+from __future__ import print_function
+from itertools import islice
 import os
 import ast
 
 from astpath.asts import convert_to_xml
+
+try:
+    from lxml.etree import tostring
+    XML_VERSION = 'lxml'
+except ImportError:
+    from xml.etree.ElementTree import tostring
+    XML_VERSION = 'xml'
 
 
 PYTHON_EXTENSION = '{}py'.format(os.path.extsep)
@@ -17,17 +26,25 @@ def _query_factory(verbose=False):
     def xml_query(element, expression):
         return element.findall(expression)
 
-    try:
-        import lxml
-    except ImportError:
+    if XML_VERSION == 'lxml':
+        return lxml_query
+    else:
         if verbose:
             print(
                 "WARNING: lxml could not be imported, "
                 "falling back to native XPath engine."
             )
         return xml_query
+
+
+def _tostring_factory():
+    def xml_tostring(*args, pretty_print=False, **kwargs):
+        return tostring(*args, **kwargs)
+
+    if XML_VERSION == 'lxml':
+        return tostring
     else:
-        return lxml_query
+        return xml_tostring
 
 
 def find_in_ast(xml_ast, expr, return_lines=True, query=_query_factory(), node_mappings=None):
@@ -38,21 +55,19 @@ def find_in_ast(xml_ast, expr, return_lines=True, query=_query_factory(), node_m
     returning XML nodes.
     """
     results = query(xml_ast, expr)
+    if return_lines:
+        return linenos_from_xml(results, query=query, node_mappings=node_mappings)
+    return results
 
-    if not return_lines:
-        return results
 
+def linenos_from_xml(elements, query=_query_factory(), node_mappings=None):
+    """Given a list of elements, return a list of line numbers."""
     lines = []
-    for result in results:
+    for element in elements:
         try:
-            linenos = query(
-                result,
-                './ancestor-or-self::*[@lineno][1]/@lineno'
-            )
+            linenos = query(element, './ancestor-or-self::*[@lineno][1]/@lineno')
         except AttributeError:
-            raise AttributeError(
-                "Element has no ancestor with line number."
-            )
+            raise AttributeError("Element has no ancestor with line number.")
         except SyntaxError:
             # we're not using lxml backend
             if node_mappings is None:
@@ -60,7 +75,7 @@ def find_in_ast(xml_ast, expr, return_lines=True, query=_query_factory(), node_m
                     "Lines cannot be returned when using native"
                     "backend without `node_mappings` supplied."
                 )
-            linenos = getattr(node_mappings[result], 'lineno', 0),
+            linenos = getattr(node_mappings[element], 'lineno', 0),
 
         if linenos:
             lines.append(int(linenos[0]))
@@ -88,7 +103,11 @@ def file_to_xml_ast(filename, omit_docstrings=False, node_mappings=None):
     )
 
 
-def search(directory, expression, print_matches=True, return_lines=True, show_lines=True, verbose=False, abspaths=False, recurse=True, before_context=0, after_context=0):
+def search(
+        directory, expression, print_matches=False, return_lines=True,
+        show_lines=True, verbose=False, abspaths=False, recurse=True,
+        before_context=0, after_context=0
+):
     """
     Perform a recursive search through Python files.
 
@@ -102,31 +121,24 @@ def search(directory, expression, print_matches=True, return_lines=True, show_li
 
     if os.path.isfile(directory):
         if recurse:
-            raise ValueError(
-                "Cannot recurse when only a single file is specified."
-            )
+            raise ValueError("Cannot recurse when only a single file is specified.")
         files = (('', None, [directory]),)
     elif recurse:
         files = os.walk(directory)
     else:
-        files = ((directory, None, [
-            item
-            for item in
-            os.listdir(directory)
-            if os.path.isfile(
-                os.path.join(
-                    directory,
-                    item,
-                )
-            )
-        ]),)
-
+        files = ((
+            directory,
+            None,
+            [
+                item for item in os.listdir(directory)
+                if os.path.isfile(os.path.join(directory, item))
+            ]
+        ),)
     global_matches = []
     for root, __, filenames in files:
         python_filenames = (
             os.path.join(root, filename)
-            for filename in
-            filenames
+            for filename in filenames
             if filename.endswith(PYTHON_EXTENSION)
         )
         for filename in python_filenames:
@@ -134,8 +146,7 @@ def search(directory, expression, print_matches=True, return_lines=True, show_li
             try:
                 with open(filename, 'r') as f:
                     contents = f.read()
-                if show_lines:
-                    file_lines = contents.splitlines()
+                file_lines = contents.splitlines()
                 xml_ast = file_contents_to_xml_ast(
                     contents,
                     node_mappings=node_mappings,
@@ -157,41 +168,41 @@ def search(directory, expression, print_matches=True, return_lines=True, show_li
 
             for match in file_matches:
                 if print_matches:
-                    matching_line = match - 1
-
-                    if show_lines:
-                        before_lines = range(
-                            max(matching_line - before_context, 0),
-                            matching_line
-                        )
-                        after_lines = range(
-                            matching_line + 1,
-                            min(matching_line + after_context + 1, len(file_lines))
-                        )
-                        len_match = len(str(match))
-                        for i in before_lines:
-                            print('{}:{}\t {}'.format(
-                                os.path.abspath(filename) if abspaths else filename,
-                                str(i + 1).rjust(len_match),
-                                file_lines[i],
-                            ))
-
-                    print('{}:{}{}{}'.format(
-                        os.path.abspath(filename) if abspaths else filename,
-                        match,  # will be a line number
-                        '\t>' if show_lines else '',
-                        file_lines[matching_line] if show_lines else '',
+                    matching_lines = list(context(
+                        file_lines, match - 1, before_context, after_context
                     ))
-
-                    if show_lines:
-                        for i in after_lines:
-                            print('{}:{}\t {}'.format(
-                                os.path.abspath(filename) if abspaths else filename,
-                                str(i + 1).rjust(len_match),
-                                file_lines[i],
-                            ))
+                    for lineno, line in matching_lines:
+                        print('{path}:{lineno:<5d}{sep}\t{line}'.format(
+                            path=os.path.abspath(filename) if abspaths else filename,
+                            lineno=lineno,
+                            sep='>' if lineno == match - 1 else ' ',
+                            line=line if show_lines else '',
+                        ))
+                    if before_context or after_context:
+                        print()
                 else:
                     global_matches.append((filename, match))
 
     if not print_matches:
         return global_matches
+
+
+def context(lines, index, before=0, after=0, both=0):
+    """
+    Yield of 2-tuples from lines around the index. Like grep -A, -B, -C.
+
+    before and after are ignored if a value for both is set. Example usage::
+
+        >>>list(context('abcdefghij', 5, before=1, after=2))
+        [(4, 'e'), (5, 'f'), (6, 'g'), (7, 'h')]
+
+    :arg iterable lines: Iterable to select from.
+    :arg int index: The item of interest.
+    :arg int before: Number of lines of context before index.
+    :arg int after: Number of lines of context after index.
+    :arg int both: Number of lines of context either side of index.
+    """
+    before, after = (both, both) if both else (before, after)
+    start = max(0, index - before)
+    end = index + 1 + after
+    return islice(enumerate(lines), start, end)
