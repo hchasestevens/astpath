@@ -8,12 +8,18 @@ import ast
 
 from astpath.asts import convert_to_xml
 
+
+class XMLVersions:
+    LXML = object()
+    XML = object()
+
+
 try:
     from lxml.etree import tostring
-    XML_VERSION = 'lxml'
+    XML_VERSION = XMLVersions.LXML
 except ImportError:
     from xml.etree.ElementTree import tostring
-    XML_VERSION = 'xml'
+    XML_VERSION = XMLVersions.XML
 
 
 PYTHON_EXTENSION = '{}py'.format(os.path.extsep)
@@ -26,7 +32,7 @@ def _query_factory(verbose=False):
     def xml_query(element, expression):
         return element.findall(expression)
 
-    if XML_VERSION == 'lxml':
+    if XML_VERSION is XMLVersions.LXML:
         return lxml_query
     else:
         if verbose:
@@ -35,16 +41,6 @@ def _query_factory(verbose=False):
                 "falling back to native XPath engine."
             )
         return xml_query
-
-
-def _tostring_factory():
-    def xml_tostring(*args, pretty_print=False, **kwargs):
-        return tostring(*args, **kwargs)
-
-    if XML_VERSION == 'lxml':
-        return tostring
-    else:
-        return xml_tostring
 
 
 def find_in_ast(xml_ast, expr, return_lines=True, query=_query_factory(), node_mappings=None):
@@ -72,7 +68,7 @@ def linenos_from_xml(elements, query=_query_factory(), node_mappings=None):
             # we're not using lxml backend
             if node_mappings is None:
                 raise ValueError(
-                    "Lines cannot be returned when using native"
+                    "Lines cannot be returned when using native "
                     "backend without `node_mappings` supplied."
                 )
             linenos = getattr(node_mappings[element], 'lineno', 0),
@@ -106,7 +102,7 @@ def file_to_xml_ast(filename, omit_docstrings=False, node_mappings=None):
 def search(
         directory, expression, print_matches=False, return_lines=True,
         show_lines=True, verbose=False, abspaths=False, recurse=True,
-        before_context=0, after_context=0
+        before_context=0, after_context=0, extension=PYTHON_EXTENSION
 ):
     """
     Perform a recursive search through Python files.
@@ -126,20 +122,17 @@ def search(
     elif recurse:
         files = os.walk(directory)
     else:
-        files = ((
-            directory,
-            None,
-            [
-                item for item in os.listdir(directory)
-                if os.path.isfile(os.path.join(directory, item))
-            ]
-        ),)
+        files = ((directory, None, [
+            item
+            for item in os.listdir(directory)
+            if os.path.isfile(os.path.join(directory, item))
+        ]),)
     global_matches = []
     for root, __, filenames in files:
         python_filenames = (
             os.path.join(root, filename)
             for filename in filenames
-            if filename.endswith(PYTHON_EXTENSION)
+            if filename.endswith(extension)
         )
         for filename in python_filenames:
             node_mappings = {}

@@ -39,8 +39,8 @@ def main():
     else:
         recurse = not args.no_recurse
 
-    before_context = args.context or args.before_context
-    after_context = args.context or args.after_context
+    before_context = args.before_context or args.context
+    after_context = args.after_context or args.context
     if (before_context or after_context) and args.hide_lines:
         print("ERROR: Context cannot be specified when suppressing output.")
         exit(1)
