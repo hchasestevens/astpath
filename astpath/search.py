@@ -2,7 +2,7 @@
 
 
 from __future__ import print_function
-from itertools import islice
+from itertools import islice, repeat
 import os
 import ast
 
@@ -43,17 +43,21 @@ def _query_factory(verbose=False):
         return xml_query
 
 
-def find_in_ast(xml_ast, expr, return_lines=True, query=_query_factory(), node_mappings=None):
-    """
-    Find items matching expression expr in an XML AST.
+def _tostring_factory():
+    def xml_tostring(*args, **kwargs):
+        kwargs.pop('pretty_print')
+        return tostring(*args, **kwargs)
 
-    If return_lines is True, return only matching line numbers, otherwise
-    returning XML nodes.
-    """
+    if XML_VERSION is XMLVersions.LXML:
+        return tostring
+    else:
+        return xml_tostring
+
+
+def find_in_ast(xml_ast, expr, query=_query_factory(), node_mappings=None):
+    """Find items matching expression expr in an XML AST."""
     results = query(xml_ast, expr)
-    if return_lines:
-        return linenos_from_xml(results, query=query, node_mappings=node_mappings)
-    return results
+    return linenos_from_xml(results, query=query, node_mappings=node_mappings)
 
 
 def linenos_from_xml(elements, query=_query_factory(), node_mappings=None):
@@ -100,8 +104,8 @@ def file_to_xml_ast(filename, omit_docstrings=False, node_mappings=None):
 
 
 def search(
-        directory, expression, print_matches=False, return_lines=True,
-        show_lines=True, verbose=False, abspaths=False, recurse=True,
+        directory, expression, print_matches=False, print_xml=False,
+        verbose=False, abspaths=False, recurse=True,
         before_context=0, after_context=0, extension=PYTHON_EXTENSION
 ):
     """
@@ -110,9 +114,6 @@ def search(
     Only for files in the given directory for items matching the specified
     expression.
     """
-    if show_lines and not return_lines:
-        raise ValueError("`return_lines` must be set if showing lines.")
-
     query = _query_factory(verbose=verbose)
 
     if os.path.isfile(directory):
@@ -151,16 +152,19 @@ def search(
                     ))
                 continue  # unparseable
 
-            file_matches = find_in_ast(
-                xml_ast,
-                expression,
-                return_lines=print_matches or return_lines,
-                query=query,
-                node_mappings=node_mappings,
-            )
+            matching_elements = query(xml_ast, expression)
 
-            for match in file_matches:
-                if print_matches:
+            if print_xml:
+                tostring = _tostring_factory()
+                for element in matching_elements:
+                    print(tostring(xml_ast, pretty_print=True))
+                    # print(unicode(tostring(xml_ast, pretty_print=True), 'utf-8'))
+
+            matching_lines = linenos_from_xml(matching_elements, query=query, node_mappings=node_mappings)
+            global_matches.extend(zip(repeat(filename), matching_lines))
+
+            if print_matches:
+                for match in matching_lines:
                     matching_lines = list(context(
                         file_lines, match - 1, before_context, after_context
                     ))
@@ -169,15 +173,12 @@ def search(
                             path=os.path.abspath(filename) if abspaths else filename,
                             lineno=lineno,
                             sep='>' if lineno == match - 1 else ' ',
-                            line=line if show_lines else '',
+                            line=line,
                         ))
                     if before_context or after_context:
                         print()
-                else:
-                    global_matches.append((filename, match))
 
-    if not print_matches:
-        return global_matches
+    return global_matches
 
 
 def context(lines, index, before=0, after=0, both=0):
