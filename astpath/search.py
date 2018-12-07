@@ -21,13 +21,13 @@ except ImportError:
     from xml.etree.ElementTree import tostring
     XML_VERSION = XMLVersions.XML
 
-
+ns = {"re": "http://exslt.org/regular-expressions"}
 PYTHON_EXTENSION = '{}py'.format(os.path.extsep)
 
 
-def _query_factory(verbose=False):
+def _query_factory(verbose=False, allow_re=False):
     def lxml_query(element, expression):
-        return element.xpath(expression)
+        return element.xpath(expression, namespaces=ns)
 
     def xml_query(element, expression):
         return element.findall(expression)
@@ -106,7 +106,8 @@ def file_to_xml_ast(filename, omit_docstrings=False, node_mappings=None):
 def search(
         directory, expression, print_matches=False, print_xml=False,
         verbose=False, abspaths=False, recurse=True,
-        before_context=0, after_context=0, extension=PYTHON_EXTENSION
+        before_context=0, after_context=0, extension=PYTHON_EXTENSION,
+        allow_re=False
 ):
     """
     Perform a recursive search through Python files.
@@ -114,7 +115,7 @@ def search(
     Only for files in the given directory for items matching the specified
     expression.
     """
-    query = _query_factory(verbose=verbose)
+    query = _query_factory(verbose=verbose, allow_re=allow_re)
 
     if os.path.isfile(directory):
         if recurse:

@@ -21,6 +21,7 @@ parser.add_argument('-v', '--verbose', help="increase output verbosity", action=
 parser.add_argument('-x', '--xml', help="print only the matching XML elements", action='store_true',)
 parser.add_argument('-a', '--abspaths', help="show absolute paths", action='store_true',)
 parser.add_argument('-R', '--no-recurse', help="ignore subdirectories, searching only files in the specified directory", action='store_true',)
+parser.add_argument('-re', '--regular-expressions', help="support regular expressions in XPath", action='store_true',)
 parser.add_argument('-d', '--dir', help="search directory or file", default='.',)
 parser.add_argument('-A', '--after-context', help="lines of context to display after matching line", type=int, default=0,)
 parser.add_argument('-B', '--before-context', help="lines of context to display after matching line", type=int, default=0,)
@@ -55,6 +56,7 @@ def main():
         recurse=recurse,
         before_context=before_context,
         after_context=after_context,
+        allow_re=args.regular_expressions
     )
 
 
