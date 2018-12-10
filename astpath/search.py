@@ -25,9 +25,10 @@ ns = {"re": "http://exslt.org/regular-expressions"}
 PYTHON_EXTENSION = '{}py'.format(os.path.extsep)
 
 
-def _query_factory(verbose=False, allow_re=False):
+def _query_factory(verbose=False, allow_ns=True):
+    namespaces = ns if allow_ns else {}
     def lxml_query(element, expression):
-        return element.xpath(expression, namespaces=ns)
+        return element.xpath(expression, namespaces=namespaces)
 
     def xml_query(element, expression):
         return element.findall(expression)
@@ -107,7 +108,7 @@ def search(
         directory, expression, print_matches=False, print_xml=False,
         verbose=False, abspaths=False, recurse=True,
         before_context=0, after_context=0, extension=PYTHON_EXTENSION,
-        allow_re=False
+        allow_ns=True
 ):
     """
     Perform a recursive search through Python files.
@@ -115,7 +116,7 @@ def search(
     Only for files in the given directory for items matching the specified
     expression.
     """
-    query = _query_factory(verbose=verbose, allow_re=allow_re)
+    query = _query_factory(verbose=verbose, allow_ns=allow_ns)
 
     if os.path.isfile(directory):
         if recurse:
