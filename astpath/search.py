@@ -4,6 +4,7 @@
 from __future__ import print_function
 from itertools import islice, repeat
 import os
+import re
 import ast
 
 from astpath.asts import convert_to_xml
@@ -16,6 +17,7 @@ class XMLVersions:
 
 try:
     from lxml.etree import tostring
+    from lxml import etree
     XML_VERSION = XMLVersions.LXML
 except ImportError:
     from xml.etree.ElementTree import tostring
@@ -52,6 +54,25 @@ def _tostring_factory():
         return tostring
     else:
         return xml_tostring
+
+
+if XML_VERSION is XMLVersions.LXML:
+    regex_ns = etree.FunctionNamespace('https://github.com/hchasestevens/astpath')
+    regex_ns.prefix = 're'
+
+    @regex_ns
+    def match(ctx, pattern, strings):
+        return any(
+            re.match(pattern, s) is not None
+            for s in strings
+        )
+
+    @regex_ns
+    def search(ctx, pattern, strings):
+        return any(
+            re.search(pattern, s) is not None
+            for s in strings
+        )
 
 
 def find_in_ast(xml_ast, expr, query=_query_factory(), node_mappings=None):
