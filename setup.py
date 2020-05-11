@@ -5,7 +5,7 @@ from setuptools import setup
 setup(
     name='astpath',
     packages=['astpath'],
-    version='0.9.0',
+    version='0.9.1',
     description='A query language for Python abstract syntax trees',
     license='MIT',
     author='H. Chase Stevens',
