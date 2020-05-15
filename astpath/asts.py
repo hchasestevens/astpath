@@ -80,6 +80,13 @@ def convert_to_xml(node, omit_docstrings=False, node_mappings=None):
                     )
 
         elif field_value is not None:
+            ## add type attribute e.g. so we can distinguish strings from numbers etc
+            ## in older Python (< 3.8) type could be identified by Str vs Num and s vs n etc
+            ## e.g. <Constant lineno="1" col_offset="6" type="int" value="1"/>
+            _set_encoded_literal(
+                partial(xml_node.set, 'type'),
+                type(field_value).__name__
+            )
             _set_encoded_literal(
                 partial(xml_node.set, field_name),
                 field_value

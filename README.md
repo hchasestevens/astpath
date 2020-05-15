@@ -86,6 +86,16 @@ $ astpath -A 1 "//For/body[AugAssign/op/Add and count(child::*)=1]" | head -6
 ./pstats.py:513          nc += calls
 ```
 
+_Finding classes matching a regular expression:_
+```bash
+$ astpath "//ClassDef[re:match('.*Var', @name)]" | head -5
+./typing.py:452  >      class TypeVar(_TypingBase, _root=True):
+./typing.py:1366 >      class _ClassVar(_FinalTypingBase, _root=True):
+./tkinter/__init__.py:287  >    class Variable:
+./tkinter/__init__.py:463  >    class StringVar(Variable):
+./tkinter/__init__.py:485  >    class IntVar(Variable):
+```
+
 `astpath` can also be imported and used programmatically:
 ```python
 >>> from astpath import search
@@ -112,6 +122,7 @@ pip install astpath
 * Official `ast` module documentation for [Python 2.7](https://docs.python.org/2.7/library/ast.html) and [Python 3.X](https://docs.python.org/3/library/ast.html).
 * [Python AST Explorer](https://python-ast-explorer.com/) for worked examples of ASTs.
 * A [brief guide to XPath](http://www.w3schools.com/xml/xpath_syntax.asp).
+* [`bellybutton`](https://github.com/hchasestevens/bellybutton), a fully-featured linting engine built on `astpath`.
 
 ## Contacts
 
