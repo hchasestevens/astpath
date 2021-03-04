@@ -103,9 +103,9 @@ def linenos_from_xml(elements, query=_query_factory(), node_mappings=None):
     return lines
 
 
-def file_contents_to_xml_ast(contents, omit_docstrings=False, node_mappings=None):
+def file_contents_to_xml_ast(contents, omit_docstrings=False, node_mappings=None, filename='<unknown>'):
     """Convert Python file contents (as a string) to an XML AST, for use with find_in_ast."""
-    parsed_ast = ast.parse(contents)
+    parsed_ast = ast.parse(contents, filename)
     return convert_to_xml(
         parsed_ast,
         omit_docstrings=omit_docstrings,
@@ -121,6 +121,7 @@ def file_to_xml_ast(filename, omit_docstrings=False, node_mappings=None):
         contents,
         omit_docstrings=omit_docstrings,
         node_mappings=node_mappings,
+        filename=filename,
     )
 
 
