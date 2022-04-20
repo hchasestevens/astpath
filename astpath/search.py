@@ -179,7 +179,7 @@ def search(
             if print_xml:
                 tostring = _tostring_factory()
                 for element in matching_elements:
-                    print(tostring(xml_ast, pretty_print=True))
+                    print(tostring(xml_ast, pretty_print=True, encoding='unicode'))
 
             matching_lines = linenos_from_xml(matching_elements, query=query, node_mappings=node_mappings)
             global_matches.extend(zip(repeat(filename), matching_lines))
